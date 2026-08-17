@@ -17,49 +17,25 @@ dependencies and TakT-compatible GitHub CLI tooling.
 ## Use when
 
 - As an initial basic TakT setup
-- `cspell`, `prettier` and `markdownlint-cli2` as the only verification methods.
+- `cspell`, `prettier` and `markdownlint-cli2` are the only verification methods.
 - No build or tools stack support yet. 
 - The repo should uses a single standard Ubuntu LTS devcontainer
 
-## Files created or updated
-
-- `.devcontainer/devcontainer.json`
-- `.insitu.yml`
-- `.gitignore` (append if it already exists)
-- `.gitconfig`
-- `.githooks/pre-commit`
-
 ## Implementation steps
 
-In the following steps that name both a _source_ and a _target-, Create the _target_ using the _source_ as an offset. If the _target_ files already exists, it's likely that the skill has already run  befoe and that this is an update run. You shall then attemptto merge the content of the _source_ file into the existing file. Use a standard three-way-merge approach where _change lead_. If a clean merge seems impossible, mark the conflict it as a standard merge conflict and let the user resolve it manually.
+Files in the template folder are all created, or updated/merged if they alreay exist.
 
-If changes are insignificant, you should assess wether it makes more sense to act _idempotently_ and leave the file as is. If you are unsure, ask the user for guidance.
+In the following steps both a _source_ and a _target_ is named., Create the _target_ using the _source_ as an offset. All files in the template directory are valid, and in the event that the _target_ doesn't already exist, you can simply copy the file _source_ file over as _target_ without modifications.
+
+However, if the _target_ files already exists, it's likely that either the skill has already run before and that this is an update run. Or perhaps the repo is already somewhat TakT enabled, and this skill must then complete the setup. If target files exist then attempt to merge the content of the _source_ file into the existing _target_ file. Use a standard three-way-merge approach where _change lead;_ include sensible changes from both _ours_ and _theirs_ to create the _target_. If a clean merge seems impossible, mark the conflict it as a standard merge conflict and continue the processin of the rest of the steps. Notify the user to manually resolve any conflicts you marked.
+
+If changes are insignificant or senmantically indifferent, you should stive to act _idempotently_ and leave the file as is. If you are unsure, ask the user for guidance.
 
 Do not stage or commit any files to the repository. The user will be responsible for staging and committing the changes after reviewing them.
 
 ### Devcontainer
 source: `templates/.devcontainer/devcontainer.json`
 target: `.devcontainer/devcontainer.json`
-
-### Insitu
-source: `templates/insitu.yml`
-target: `.insitu.yml`
-
-### GitHub Issue Template
-source: `templates/.github/ISSUE_TEMPLATE/standard-mom.md`
-target: `.github/ISSUE_TEMPLATE/standard-mom.md`
-
-### Git Config
-source: `templates/.gitconfig`
-target: `.gitconfig`
-
-### Git ignore
-source: `templates/.gitignore`
-target: `.gitignore`
-
-### Git Hooks
-source: `templates/.githooks/pre-commit`
-target: `.githooks/pre-commit`
 
 ### cSpell
 source: `templates/.cspell.jsonc`
@@ -68,21 +44,17 @@ target: `.cspell.jsonc`
 Source: `templates/.dict/repo.dictionary`
 target: `.dict/repo.dictionary`
 
-### markdownlint
-source: `templates/.markdownlint-cli2.jsonc`
-target: `.markdownlint-cli2.jsonc`
-
-### VS Code
-source: `templates/.vscode/settings.json`
-target: `.vscode/settings.json`
-
-source: `templates/default.code-workspace`
-target: `default.code-workspace`
+### Git Hooks
+source: `templates/.githooks/pre-commit`
+target: `.githooks/pre-commit`
 
 ### Actions
-
 source: `templates/.github/actions/prep-runner/action.yml`
 target: `.github/actions/prep-runner/action.yml`
+
+### GitHub Issue Template
+source: `templates/.github/ISSUE_TEMPLATE/standard-mom.md`
+target: `.github/ISSUE_TEMPLATE/standard-mom.md`
 
 ### Workflows
 source: `templates/.github/workflows/copilot-setup-steps.yml`
@@ -104,9 +76,36 @@ source: `templates/.github/workflows/pr-to-ready.yml`
 target: `.github/workflows/pr-to-ready.yml`
 
 ### Copilot instructions
-
 source: `templates/.github/copilot-instructions.md`
 target: `.github/copilot-instructions.md`
+
+### VS Code
+source: `templates/.vscode/settings.json`
+target: `.vscode/settings.json`
+
+source: `templates/default.code-workspace`
+target: `default.code-workspace`
+
+### Git Config
+source: `templates/.gitconfig`
+target: `.gitconfig`
+
+### Git ignore
+source: `templates/.gitignore`
+target: `.gitignore`
+
+### Insitu
+source: `templates/insitu.yml`
+target: `.insitu.yml`
+
+### markdownlint
+source: `templates/.markdownlint-cli2.jsonc`
+target: `.markdownlint-cli2.jsonc`
+
+### Prettier
+
+source: `template/.prettierignore`
+target: `.prettierignore`
 
 
 ## verification steps
@@ -138,21 +137,14 @@ The command:
 gh insitu run fix-all
 ```
 
-will attempt to fix all issues found by bot prettier and markdownlint-clli2. But you may need to help the user by addin folders to ignore to `.markdownlint-cli2.jsonc` and `.prettierignore` if the repository has a lot of files that are not relevant to the project or apper to be autogenreated or imported from somewhere else. 
+will attempt to fix all issues found by both prettier and markdownlint-clli2. But you may need to help the user by adding folders to ignore to `.markdownlint-cli2.jsonc` and `.prettierignore` especially if the repository has a lot of files that are not relevant to the project or apper to be auto-generated or imported from somewhere else. 
 
-The spelling can be executer simply by running the following command:
+The spelling can be executed simply by running the following command:
 
 ```bash
 cspell
 ```
 
-Iw words are valid and should be added to the dictionary, you can add them to the `.dict/repo.dictionary` keet the file sorted alphabetically. If you find any misspelled words you can correct them. If you are unsure about a word, you can ask the user for guidance.
+If cspell report valid words as errors, you should add them to the dictionary `.dict/repo.dictionary` keep the file sorted alphabetically. If you find any misspelled words you can correct them. If you are unsure about a word, you can ask the user for guidance.
 
 Leave the changed files unstaged and uncommitted for the user to review and commit.
-
-
-## Notes
-
-- Keep runtime minimal; avoid app-framework dependencies unless explicitly needed.
-- Prefer markdown/doc quality tooling over build stacks for docs-first repos.
-- Install lint tools through devcontainer features and verify them in insitu.
