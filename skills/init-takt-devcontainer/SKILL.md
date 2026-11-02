@@ -1,35 +1,33 @@
 ---
 name: init-takt-devcontainer
 description: >-
-  Initialize a minimal standalone devcontainer with TakT tooling. 
-  TakT is a set of DevX tooling bundled into a conceptual unity, although it spawns
-  both GitHub CLI extensions, GitHub Actions, Project and Issue templates, and other DevX tooling. 
-  This skill is used to initialize a repository with devcontainer with TakT tooling.
-  Later you can apply more specific skills to add specific tools stack awareness, suchs as Astro, Jekyll,
-  GoLang, Python etc.
+  Initialize a minimal standalone TakT devcontainer with GitHub CLI tooling,
+  quality checks, workflows, and repository templates. Apply stack- or
+  profile-specific skills separately when needed.
 ---
 
 # Init TakT Devcontainer
 
-Use this skill when a repository needs a standalone devcontainer with minimal
-dependencies and TakT-compatible GitHub CLI tooling.
+Use this skill when a repository needs a standalone devcontainer with the core
+TakT tooling and repository setup, before applying stack or profile skills.
 
 ## Use when
 
-- As an initial basic TakT setup
-- `cspell`, `prettier` and `markdownlint-cli2` are the only verification methods.
-- No build or tools stack support yet. 
-- The repo should uses a single standard Ubuntu LTS devcontainer
+- The repository needs the initial core TakT setup.
+- The repository does not need an application build stack in this skill.
+- Verification uses `cspell`, `prettier`, and `markdownlint-cli2`.
+- The repository should use the Ubuntu 24.04 base devcontainer, with Python
+  3.14 and Node.js 24 available.
 
 ## Implementation steps
 
-Files in the template folder are all created, or updated/merged if they alreay exist.
-
-In the following steps both a _source_ and a _target_ is named., Create the _target_ using the _source_ as an offset. All files in the template directory are valid, and in the event that the _target_ doesn't already exist, you can simply copy the file _source_ file over as _target_ without modifications.
-
-However, if the _target_ files already exists, it's likely that either the skill has already run before and that this is an update run. Or perhaps the repo is already somewhat TakT enabled, and this skill must then complete the setup. If target files exist then attempt to merge the content of the _source_ file into the existing _target_ file. Use a standard three-way-merge approach where _change lead;_ include sensible changes from both _ours_ and _theirs_ to create the _target_. If a clean merge seems impossible, mark the conflict it as a standard merge conflict and continue the processin of the rest of the steps. Notify the user to manually resolve any conflicts you marked.
-
-If changes are insignificant or senmantically indifferent, you should stive to act _idempotently_ and leave the file as is. If you are unsure, ask the user for guidance.
+For each source and target below, copy the source to the target if the target
+does not exist. If the target already exists, use a standard three-way merge to
+preserve sensible changes from both the template and the repository. Keep the
+operation idempotent: leave a target unchanged when it already matches the
+intended setup. If a conflict cannot be resolved, mark it with standard merge
+conflict markers, continue with the remaining files, and tell the user which
+conflicts need manual resolution.
 
 Do not stage or commit any files to the repository. The user will be responsible for staging and committing the changes after reviewing them.
 
@@ -104,32 +102,39 @@ target: `.markdownlint-cli2.jsonc`
 
 ### Prettier
 
-source: `template/.prettierignore`
+source: `templates/.prettierignore`
 target: `.prettierignore`
 
+### Documentation
 
-## verification steps
+source: `templates/docs/takt.todo.md`
+target: `docs/takt.todo.md`
 
-The verification is to use the VS Code feature `Dev Containers: Rebuild and Reopen in Container` after the devcontainer is built and openened the workspace should be loaded.
+Copy this template into the target repository when applying the skill; do not
+create the target file in the skill-library repository itself.
 
-the verification steps  below only makes sense if you have a devcontainer already running and you are inside the container. The use may reinvoke this skill after first run, just to run the verification steps. If that is the case then you should jump straight to  verification.
 
+## Verification
 
-The pre-commit hook will be automatically installed and run on every commit. The hook will run the `trunk-worthy` insitu command, which will verify that the repository is ready for trunk development.
+After creating or updating the devcontainer files, run
+`Dev Containers: Rebuild and Reopen in Container` in VS Code. If the container
+is already running and this skill is being used only for verification, run the
+checks below from the repository root inside the container.
 
-You can run it manually by running the following command:
+The post-create insitu wave configures the repository `.gitconfig`, which sets
+`core.hooksPath` to `.githooks`. The pre-commit hook then runs
+`gh insitu run trunk-worthy` on each commit. Run the same check manually with:
 
 ```bash
 .githooks/pre-commit
 ```
 
-or alternatively you can run the following command:
-
 ```bash
 gh insitu run trunk-worthy
-```bash
+```
 
-It's likely that the first run of the pre-commit hook will fail, because the spelling and linting tools will find issues in the repository. You can offer to fix those issues. but if you do, leave the changed files unstaged and uncommitted for the user to review and commit.
+The first run may find existing spelling or lint issues. Offer to fix them,
+but leave changed files unstaged and uncommitted for the user to review.
 
 The command:
 
@@ -137,14 +142,18 @@ The command:
 gh insitu run fix-all
 ```
 
-will attempt to fix all issues found by both prettier and markdownlint-clli2. But you may need to help the user by adding folders to ignore to `.markdownlint-cli2.jsonc` and `.prettierignore` especially if the repository has a lot of files that are not relevant to the project or apper to be auto-generated or imported from somewhere else. 
+This runs the configured Markdown and Prettier auto-fixes; it does not fix
+spelling issues. If generated or unrelated files cause lint failures, update
+`.markdownlint-cli2.jsonc` or `.prettierignore` only when appropriate for the
+repository.
 
-The spelling can be executed simply by running the following command:
+Run the configured spelling check with:
 
 ```bash
 cspell
 ```
 
-If cspell report valid words as errors, you should add them to the dictionary `.dict/repo.dictionary` keep the file sorted alphabetically. If you find any misspelled words you can correct them. If you are unsure about a word, you can ask the user for guidance.
+Add valid project-specific words to `.dict/repo.dictionary` and keep the file
+sorted alphabetically. Correct misspellings; ask the user about uncertain terms.
 
 Leave the changed files unstaged and uncommitted for the user to review and commit.

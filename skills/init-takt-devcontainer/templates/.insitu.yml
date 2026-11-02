@@ -10,17 +10,13 @@ inventory:
     name: GitHub Authentication
     command: gh auth status
 
-  - id: install-gh-aw
-    name: Install gh-aw
-    command: gh extension install github/gh-aw || true
-
   - id: install-gh-insitu
     name: Install gh-insitu
-    command: gh extension install devx-cafe/gh-insitu || true
+    command: gh extension install devx-cafe/gh-insitu 
 
   - id: install-gh-tt
     name: Install gh-tt
-    command: gh extension install devx-cafe/gh-tt || true
+    command: gh extension install devx-cafe/gh-tt
 
   - id: install-takt-shortcuts
     name: Install TakT shortcuts
@@ -42,33 +38,28 @@ inventory:
 
   - id: cspell
     name: Run cspell
-    command: cspell "**/*.md"
+    command: cspell
 
   - id: markdownlint
     name: Run markdownlint
-    command: markdownlint-cli2 "**/*.md"
+    command: markdownlint-cli2
 
   - id: prettier
     name: Run prettier
     command: prettier --check .
 
-  - id: "install-lint-tools"
+  - id: "install-npm-tools"
     name: "Install linting and checker tools"
     command: |
-      npm install -g prettier markdownlint-cli2 cspell @cspell/dict-da-dk
+      npm install -g prettier markdownlint-cli2 cspell @cspell/dict-da-dk @mindovermachine-dev/remote-astro-theme
 
-  - id: verify-lint-tools
+  - id: verify-npm-tools
     name: Verify linting tools are available
     command: |
       command -v cspell
       command -v markdownlint-cli2
       command -v prettier
-
-  - id: version-txt
-    name: Generate version.txt
-    command: | 
-      printf 'Build from %s\\nRef: %s\\nCommit: %s\\n' \"${BUILD_REPO:-$(git remote get-url origin)}\" \"${BUILD_REF:-$(git branch --show-current)}\" \"${BUILD_SHA:-$(git rev-parse HEAD)}\" > version.txt
-    
+      command -v remote-astro-theme
 
 
   - id: "fix-markdown"
@@ -87,13 +78,12 @@ waves:
     parallel: true
     checks:
       - gh-auth
-      - install-gh-aw
+      - install-npm-tools
       - install-gh-insitu
       - install-gh-tt
       - install-takt-shortcuts
       - safe-repo
       - repo-gitconfig
-      - verify-lint-tools
 
   - id: "prep-runner"
     name: "Run to prepare GitHub runner"
@@ -102,8 +92,7 @@ waves:
       - gh-auth
       - install-gh-insitu
       - repo-gitconfig
-      - install-lint-tools
-      - version-txt
+      - install-npm-tools
 
   - id: trunk-worthy
     name: Minimum quality checks before commit
